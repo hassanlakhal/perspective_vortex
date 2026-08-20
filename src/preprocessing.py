@@ -12,6 +12,6 @@ def load_and_filter(subject, run):
     
     # Extract Events and Epochs
     events, event_id = mne.events_from_annotations(raw, dict(T1=1, T2=2), verbose=False)
-    epochs = mne.Epochs(raw, events, event_id, tmin=-0.5, tmax=4.0, 
+    epochs = mne.Epochs(raw, events, event_id, tmin=0, tmax=4.1, 
                         picks='eeg', baseline=None, preload=True, verbose=False)
     return epochs, raw
