@@ -1,10 +1,10 @@
 from src.preprocessing import load_and_filter
 import matplotlib.pyplot as plt
-
+import numpy as np
 # 1. Load data
-epochs, raw = load_and_filter(1, 12)
+epochs, raw = load_and_filter(1, 10)
 
-# print(raw.info)
+print(raw.info)
 
 # print(raw.ch_names)
 # print(raw.ch_names.index("C4"))
@@ -13,11 +13,15 @@ for ann in raw.annotations:
     if ann["description"] in ["T1", "T2"]:
         print("description : ", ann['description'] , 
         " | onset : ", ann['onset'], " | duration : ", ann['duration'])
-print(epochs)
+print(epochs.get_data().shape)
+
+print(epochs.ch_names.index("C4"))
+times = np.arange(0, 4.1, 1)
+epochs[2].average().plot_topomap(times, ch_type='eeg')
 # 2. Visualize Signal
-# raw.plot(n_channels=10, title="Filtered EEG (8-30Hz)")
+# epochs[0].plot(n_channels=10, title="Filtered EEG (8-30Hz)")
 
 
-# # 3. Visualize Power Spectral Density
-# raw.compute_psd().plot()
-# plt.show()
+# # # 3. Visualize Power Spectral Density
+# epochs[0].compute_psd().plot()
+plt.show()

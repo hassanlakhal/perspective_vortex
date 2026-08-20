@@ -10,6 +10,8 @@ def load_and_filter(subject, run):
     # Filtering: 8-30Hz (Mandatory for Motor Imagery)
     raw.filter(8., 30., fir_design='firwin', verbose=False)
     
+    montage = mne.channels.make_standard_montage("standard_1005")
+    raw.set_montage(montage, on_missing="ignore")
     # Extract Events and Epochs
     events, event_id = mne.events_from_annotations(raw, dict(T1=1, T2=2), verbose=False)
     epochs = mne.Epochs(raw, events, event_id, tmin=0, tmax=4.1, 
