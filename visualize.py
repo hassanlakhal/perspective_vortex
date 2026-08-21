@@ -1,8 +1,9 @@
 from src.preprocessing import load_and_filter
 import matplotlib.pyplot as plt
 import numpy as np
+import mne
 # 1. Load data
-epochs, raw = load_and_filter(1, 10)
+epochs, raw = load_and_filter(1, 12)
 
 print(raw.info)
 
@@ -18,12 +19,20 @@ print(epochs.ch_names.index("C4"))
 times = np.arange(0, 4.1, 2)
 print(len(epochs))
 
-fig, axes = plt.subplots(8, len(times) + 1, figsize=(15, 9))
 
-for i in range(8):
-    evoked = epochs[i].average()
-    evoked.plot_topomap(times, ch_type='eeg', axes=axes[i], show=False)
+epochs_t1 = epochs["T1"]
+
+epochs_t2 = epochs["T2"]
+
+# print(epochs_t1)
+# epochs_t1.average().plot_topomap(times, n_epochs=7)
+fig, axes = plt.subplots(7, len(times) + 1, figsize=(15, 9))
+
+for i in range(7):
+    evoked = epochs_t1[i].average()
+    evoked.plot_topomap(times, ch_type='eeg', axes=axes[i], show=False, vlim=(-50,50))
     axes[i][0].set_title(f'Epoch-{i + 1}-')
+
 # for i in range(0, 15):
 # epochs[i].average().plot_topomap(times, ch_type='eeg')
 # 2. Visualize Signal
