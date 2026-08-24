@@ -3,14 +3,16 @@ from src.preprocessing import load_and_filter
 import matplotlib.pyplot as plt
 import numpy as np
 import mne
+subj = 8
 
-epochs, raw = load_and_filter(1, 8)
+epochs, raw = load_and_filter(subj, 8)
 
 print(raw.info)
 print(raw.ch_names)
 
 print("\nAnnotations:")
 print(raw.annotations)
+
 
 # Print only T1 and T2 events
 for ann in raw.annotations:
@@ -86,6 +88,40 @@ print("T2 after crop:")
 print(power_t2_avg.times[0], power_t2_avg.times[-1])
 
 print(epochs.tmin, epochs.tmax)
+result = {}
+data_t1 = power_t1_avg.data
+c3_idx = power_t1_avg.ch_names.index("C3")
+c4_idx = power_t1_avg.ch_names.index("C4")
+
+result["T1"] = {
+    "C3" : float(np.mean(data_t1[c3_idx]) * 100),
+    "C4" : float(np.mean(data_t1[c4_idx]) * 100),
+    "n" : len(epochs_t1)
+}
+
+data_t2 = power_t2_avg.data
+c3_idx = power_t2_avg.ch_names.index("C3")
+c4_idx = power_t2_avg.ch_names.index("C4")
+
+result["T2"] = {
+    "C3" : float(np.mean(data_t2[c3_idx]) * 100),
+    "C4" : float(np.mean(data_t2[c4_idx]) * 100),
+    "n" : len(epochs_t1)
+}
+
+t1_c3 , t1_c4 = result["T1"]["C3"], result["T1"]["C4"]
+t2_c3 , t2_c4 = result["T2"]["C3"], result["T2"]["C4"]
+
+t1_ok = t1_c4 <  t1_c3
+t2_ok = t2_c3 < t2_c4
+
+print(f"{'Subj':<6}{'T1_C3':>10}{'T1_C4':>10}{'T2_C3':>10}{'T2_C4':>10}"
+          f"{'T1_lat':>10}{'T2_lat':>10}")
+print("-" * 66)
+
+print(f"S{subj:03d}"
+              f"{t1_c3:>10.2f}{t1_c4:>10.2f}{t2_c3:>10.2f}{t2_c4:>10.2f}"
+              f"{'OK' if t1_ok else 'rev':>10}{'OK' if t2_ok else 'rev':>10}")
 
 power_t1_avg.plot(
     vlim=(-50, 50),
