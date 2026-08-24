@@ -16,9 +16,9 @@ RUNS = [4, 8, 12]
 all_epochs = []
 TARGET_SFREQ = 160.0
 
-csp = CSP(n_components=6, reg='ledoit_wolf', log=True, norm_trace=False)
+csp = CSP(n_components=5, reg='ledoit_wolf', log=True, norm_trace=False)
 svm = SVC(kernel='rbf', C=1, gamma='scale')
-lda = LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto')
+lda = LinearDiscriminantAnalysis(solver='svd')
 clf = Pipeline([('CSP', csp), ('LDA', lda)])
 
 accuracies = []

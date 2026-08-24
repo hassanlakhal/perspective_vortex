@@ -11,11 +11,7 @@ def load_and_filter(subject, run):
     eegbci.standardize(raw)
     
     raw.load_data()
-    raw.pick([
-        "FC3", "FC1", "FCz", "FC2", "FC4",
-        "C5", "C3", "C1", "Cz", "C2", "C4", "C6",
-        "CP3", "CP1", "CPz", "CP2", "CP4",
-    ])
+    raw.pick(["C5", "C3", "C1", "Cz", "C2", "C4", "C6", "FC3", "FC4", "CP3", "CP4"])
     # Filtering: 8-30Hz (Mandatory for Motor Imagery)
     raw.filter(8., 30., fir_design='firwin', verbose=False)
     
