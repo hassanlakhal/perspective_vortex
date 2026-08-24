@@ -12,7 +12,8 @@ from sklearn.model_selection import cross_val_score, ShuffleSplit
 
 
 SUBJECTS = list(range(1, 110))
-RUNS = [4, 8, 12]
+# RUNS = [4, 8, 12]
+RUNS = [5, 9 , 13]
 all_epochs = []
 TARGET_SFREQ = 160.0
 
