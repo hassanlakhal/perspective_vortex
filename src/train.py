@@ -1,17 +1,17 @@
-import numpy as np
-import mne
-from mne.decoding import CSP 
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.svm import SVC
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-
-from preprocessing import load_and_filter
-from sklearn.metrics import classification_report, accuracy_score
-from sklearn.model_selection import cross_val_score, ShuffleSplit
-from mycsp import MyCSP
+import sys
 import os
 import joblib
+import numpy as np
+ 
+from sklearn.pipeline import Pipeline
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import cross_val_score
+ 
+from preprocessing import load_and_filter
+from mycsp import MyCSP
+ 
+N_COMPONENTS = 5
+MAX_DELAY_SECONDS = 2.0
 
 MODEL_DIR = "models"
 
