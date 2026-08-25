@@ -9,7 +9,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from preprocessing import load_and_filter
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.model_selection import cross_val_score, ShuffleSplit
-
+from mycsp import my_CSP
 
 SUBJECTS = list(range(1, 110))
 # RUNS = [4, 8, 12]
@@ -17,10 +17,14 @@ RUNS = [5, 9 , 13]
 all_epochs = []
 TARGET_SFREQ = 160.0
 
-csp = CSP(n_components=5, reg='ledoit_wolf', log=True, norm_trace=False)
+csp = CSP(n_components=5, reg='ledoit_wolf', log=True, norm_trace=True)
+my_CSP = my_CSP()
+
 svm = SVC(kernel='rbf', C=1, gamma='scale')
 lda = LinearDiscriminantAnalysis(solver='svd')
-clf = Pipeline([('CSP', csp), ('LDA', lda)])
+
+clf = Pipeline([('CSP', my_CSP), ('LDA', lda)])
+
 
 accuracies = []
 for subj in SUBJECTS:
