@@ -3,7 +3,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 # from numpy.linalg import eigh
 from scipy.linalg import eigh
 
-class my_CSP(BaseEstimator, TransformerMixin):
+class MyCSP(BaseEstimator, TransformerMixin):
     def __init__(self, n_components=5, log=True):
         self.n_components = n_components
         self._W = None
