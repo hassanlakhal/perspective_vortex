@@ -8,7 +8,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import cross_val_score
  
-from preprocessing import load_and_filter
+from src.preprocessing import load_and_filter
  
 MODEL_DIR = "models"
 N_COMPONENTS = 5

@@ -7,8 +7,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import cross_val_score
  
-from preprocessing import load_and_filter
-from mycsp import MyCSP
+from src.preprocessing import load_and_filter
+from src.mycsp import MyCSP
  
 N_COMPONENTS = 5
 MAX_DELAY_SECONDS = 2.0
@@ -31,7 +31,7 @@ def build_pipeline():
     clf = Pipeline([('CSP', cps), ('LDA', lda)])
     return clf
 
-def tarin(subject, run):
+def train(subject, run):
     print(f"Loading subject {subject}, run {run}...")
     epochs, raw = load_and_filter(subject, run)
 
@@ -96,5 +96,3 @@ def mode_full_evaluation():
  
     overall_mean = np.mean(list(experiment_means.values()))
     print(f"\nMean accuracy of 6 experiments: {overall_mean:.4f}")
-
-mode_full_evaluation()
