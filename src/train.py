@@ -5,8 +5,8 @@ import numpy as np
  
 from sklearn.pipeline import Pipeline
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.model_selection import cross_val_score
- 
+from sklearn.model_selection import cross_val_score, train_test_split
+
 from src.preprocessing import load_and_filter
 from src.mycsp import MyCSP
  
@@ -39,13 +39,22 @@ def train(subject, run):
     X = epochs.get_data()
     y = labels
 
+    idx = np.arange(len(y))
+
+    idx_tarin , idx_test = train_test_split(
+        idx, test_size=0.2, random_state=42, stratify=y
+    )
+
+    X_tarin, y_train = X[idx_tarin], y[idx_tarin]
+
+
     pipeline = build_pipeline()
 
-    scores = cross_val_score(pipeline, X, y, cv=5)
+    scores = cross_val_score(pipeline, X_tarin, y_train, cv=5)
     print(np.round(scores, 4).tolist())
     print(f"cross_val_score: {scores.mean():.4f}")
 
-    pipeline.fit(X,y)
+    pipeline.fit(X_tarin, y_train)
 
     os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -53,7 +62,7 @@ def train(subject, run):
 
     joblib.dump(
         {"pipeline": pipeline, "subject": subject, "run": run,
-         "ch_names": epochs.ch_names, "sfreq": epochs.info["sfreq"]},
+         "ch_names": epochs.ch_names, "sfreq": epochs.info["sfreq"], "idx_test": idx_test},
         model_path,
     )
 

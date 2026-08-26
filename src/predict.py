@@ -24,29 +24,34 @@ def mode_predict(subject, run):
     save = joblib.load(model_path)
 
     pipeline = save['pipeline']
+    idx_test = save.get("idx_test")
+
     print(f"Loading data to predict : subject {subject} -- run {run}")
     epochs , raw = load_and_filter(subject, run)
     labels = epochs.events[:, -1]
     X = epochs.get_data()
     y = labels
 
+    X_test = X[idx_test]
+    y_test = y[idx_test]
+
     predictions = []
     dealy = []
     print("\nepoch nb: [prediction] [truth] equal?")
-    for i in range(X.shape[0]):
-        chunk = X[i: i + 1]
+    for i in range(X_test.shape[0]):
+        chunk = X_test[i: i + 1]
         t0 = time.time()
         pred = pipeline.predict(chunk)[0]
         elapsed = time.time() - t0
-        equal = pred == y[i]
+        equal = pred == y_test[i]
 
         predictions.append(pred)
         dealy.append(elapsed)
 
-        print(f"epoch {i:02d}:\t[{pred}]\t[{y[i]}]\t{equal}")
+        print(f"epoch {i:02d}:\t[{pred}]\t[{y_test[i]}]\t{equal}")
     
     predictions = np.array(predictions)
-    accuracy = np.mean(predictions == y)
+    accuracy = np.mean(predictions == y_test)
     print(f"Accuracy : {accuracy:.4f}")
     
     if max(dealy) > MAX_DELAY_SECONDS :
