@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import cross_val_score, train_test_split
-
+from src.wavelet_denoiser import WaveletDenoiser
 from src.preprocessing import load_and_filter
 from src.mycsp import MyCSP
  
@@ -28,7 +28,20 @@ def build_pipeline():
 
     cps = MyCSP(n_components=5, log=True)
     lda = LinearDiscriminantAnalysis(solver='svd')
-    clf = Pipeline([('CSP', cps), ('LDA', lda)])
+    clf = Pipeline([
+        ("wavelet", WaveletDenoiser(
+            wavelet="db4",
+            level=4,
+            threshold_mode="soft"
+        )),
+
+        ("csp", MyCSP(
+            n_components=5,
+            log=True
+        )),
+
+        ("lda", LinearDiscriminantAnalysis())
+    ])
     return clf
 
 def train(subject, run):

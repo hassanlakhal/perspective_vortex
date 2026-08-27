@@ -7,7 +7,7 @@ def main():
     if len(sys.argv) == 1:
         mode_full_evaluation()
 
-    if len(sys.argv) == 4:
+    elif len(sys.argv) == 4:
         subject = int(sys.argv[1])
         run = int(sys.argv[2])
         action = sys.argv[3]
