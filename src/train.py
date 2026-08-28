@@ -9,7 +9,8 @@ from sklearn.model_selection import cross_val_score, train_test_split
 from src.wavelet_denoiser import WaveletDenoiser
 from src.preprocessing import load_and_filter
 from src.mycsp import MyCSP
- 
+from src.mylda import MyLDA
+
 N_COMPONENTS = 5
 MAX_DELAY_SECONDS = 2.0
 TARGET_SFREQ = 160.0
@@ -30,7 +31,7 @@ def build_pipeline():
     lda = LinearDiscriminantAnalysis(solver='svd')
     clf = Pipeline([
         ("wavelet", WaveletDenoiser(
-            wavelet="db4",
+            wavelet="db6",
             level=4,
             threshold_mode="soft"
         )),
@@ -40,7 +41,7 @@ def build_pipeline():
             log=True
         )),
 
-        ("lda", LinearDiscriminantAnalysis())
+        ("lda", MyLDA())
     ])
     return clf
 
