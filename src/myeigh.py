@@ -14,8 +14,11 @@ def QR(A):
 
         R[i, i] = np.linalg.norm(u)
 
-        if R[i, i] < 1e-12:
-            raise ValueError("Columns are linearly dependent") 
+        if abs(R[i, i]) < 1e-12:
+            Q[:, i] = 0
+            R[i, i] = 0
+            continue
+         
         Q[:, i] = u / R[i, i]
 
     return Q, R

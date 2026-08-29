@@ -1,149 +1,79 @@
-from src.preprocessing import load_and_filter
-
 import matplotlib.pyplot as plt
-import numpy as np
 import mne
-subj = 8
+from mne.io import concatenate_raws, read_raw_edf
+from mne.datasets import eegbci
+from src.preprocessing import load_and_filter
+ 
+SUBJECT = 4
+RUNS = [8]
+L_FREQ, H_FREQ = 8.0, 30.0
 
-epochs, raw = load_and_filter(subj, 8)
-
-print(raw.info)
-print(raw.ch_names)
-
-print("\nAnnotations:")
-print(raw.annotations)
-
-
-# Print only T1 and T2 events
-for ann in raw.annotations:
-    if ann["description"] in ["T1", "T2"]:
-        print(
-            "description:", ann["description"],
-            "| onset:", ann["onset"],
-            "| duration:", ann["duration"]
-        )
-
-print("\nEpoch data shape:")
-print(epochs.get_data().shape)
-
-print("Number of epochs:", len(epochs))
-
-
-epochs_t1 = epochs["T1"]
-epochs_t2 = epochs["T2"]
-
-print("\nT1 epochs:", len(epochs_t1))
-print("T2 epochs:", len(epochs_t2))
-
-
-
-evoked_t1 = epochs_t1.average()
-evoked_t2 = epochs_t2.average()
-
-
-baseline_interval = (-1.5, -0.5)
-freqs = np.arange(8, 31, 1)
-
-# TFR
-power_t1 = mne.time_frequency.tfr_morlet(
-    epochs_t1,
-    freqs=freqs,
-    n_cycles=freqs / 2,
-    return_itc=False,
-    average=False
-)
-
-power_t2 = mne.time_frequency.tfr_morlet(
-    epochs_t2,
-    freqs=freqs,
-    n_cycles=freqs / 2,
-    return_itc=False,
-    average=False
-)
-
-# Average across epochs
-power_t1_avg = power_t1.average()
-power_t2_avg = power_t2.average()
-
-# IMPORTANT:
-# Apply baseline while the -0.2 -> 0 interval still exists
-power_t1_avg.apply_baseline(
-    baseline=baseline_interval,
-    mode="percent"
-)
-
-power_t2_avg.apply_baseline(
-    baseline=baseline_interval,
-    mode="percent"
-)
-
-# NOW remove the baseline period from the displayed/data range
-power_t1_avg.crop(tmin=0, tmax=4.1)
-power_t2_avg.crop(tmin=0, tmax=4.1)
-
-print("T1 after crop:")
-print(power_t1_avg.times[0], power_t1_avg.times[-1])
-
-print("T2 after crop:")
-print(power_t2_avg.times[0], power_t2_avg.times[-1])
-
-print(epochs.tmin, epochs.tmax)
-result = {}
-data_t1 = power_t1_avg.data
-c3_idx = power_t1_avg.ch_names.index("C3")
-c4_idx = power_t1_avg.ch_names.index("C4")
-
-result["T1"] = {
-    "C3" : float(np.mean(data_t1[c3_idx]) * 100),
-    "C4" : float(np.mean(data_t1[c4_idx]) * 100),
-    "n" : len(epochs_t1)
-}
-
-data_t2 = power_t2_avg.data
-c3_idx = power_t2_avg.ch_names.index("C3")
-c4_idx = power_t2_avg.ch_names.index("C4")
-
-result["T2"] = {
-    "C3" : float(np.mean(data_t2[c3_idx]) * 100),
-    "C4" : float(np.mean(data_t2[c4_idx]) * 100),
-    "n" : len(epochs_t1)
-}
-
-t1_c3 , t1_c4 = result["T1"]["C3"], result["T1"]["C4"]
-t2_c3 , t2_c4 = result["T2"]["C3"], result["T2"]["C4"]
-
-t1_ok = t1_c4 <  t1_c3
-t2_ok = t2_c3 < t2_c4
-
-print(f"{'Subj':<6}{'T1_C3':>10}{'T1_C4':>10}{'T2_C3':>10}{'T2_C4':>10}"
-          f"{'T1_lat':>10}{'T2_lat':>10}")
-print("-" * 66)
-
-print(f"S{subj:03d}"
-              f"{t1_c3:>10.2f}{t1_c4:>10.2f}{t2_c3:>10.2f}{t2_c4:>10.2f}"
-              f"{'OK' if t1_ok else 'rev':>10}{'OK' if t2_ok else 'rev':>10}")
-
-power_t1_avg.plot(
-    vlim=(-50, 50),
-    cmap="RdBu_r",
-    picks=["C3"],
-    title="T1 - C3 - ERD/ERS"
-)
-
-plt.show()
+def main():
+    files = eegbci.load_data(SUBJECT, RUNS)
+    raws = [read_raw_edf(f, preload=True) for f in files]
+    raw = concatenate_raws(raws)
+    eegbci.standardize(raw)
+    raw.set_montage(
+        mne.channels.make_standard_montage("standard_1005"),
+        on_missing="ignore",
+    )
+ 
+    print("=== BEFORE FILTERING ===")
+    print(raw.info)
+ 
+    fig1 = raw.plot(
+        n_channels=10, duration=10, title="Raw EEG - BEFORE filtering",
+        show=False,
+    )
+    fig1.savefig("raw_before_filter_timedomain.png", dpi=100)
+    plt.close(fig1)
+ 
+   
+    psd_before = raw.compute_psd(fmax=80)
+    fig2 = psd_before.plot(show=False)
+    fig2.suptitle("PSD - BEFORE filtering (all frequencies present)")
+    fig2.savefig("psd_before_filter.png", dpi=100)
+    plt.close(fig2)
+ 
+    epochs ,raw_filtered = load_and_filter(SUBJECT, RUNS)
+    
+    print("\n=== AFTER FILTERING ===")
+    print(raw_filtered.info)
+ 
+    fig3 = raw_filtered.plot(
+        n_channels=10, duration=10,
+        title=f"Raw EEG - AFTER filtering ({L_FREQ}-{H_FREQ}Hz)",
+        show=False,
+    )
+    fig3.savefig("raw_after_filter_timedomain.png", dpi=100)
+    plt.close(fig3)
+ 
 
 
-power_t2_avg.plot(
-    vlim=(-50, 50),
-    cmap="RdBu_r",
-    picks=["C3"],
-    title="T2 - C3 - ERD/ERS"
-)
+    psd_after = raw_filtered.compute_psd(fmax=80)
+    fig4 = psd_after.plot(show=False)
+    fig4.suptitle(f"PSD - AFTER filtering ({L_FREQ}-{H_FREQ}Hz band isolated)")
+    fig4.savefig("psd_after_filter.png", dpi=100)
+    plt.close(fig4)
+ 
+    fig5 =  epochs.plot(
+        n_epochs=len(epochs),
+        title="T1/T2 epochs",
+        event_id=epochs.event_id,
+        event_color={1: 'blue', 2: 'red'},
+        show=False,
+    )
+    print(f"{epochs.event_id}")
+    fig5.savefig("epochs_after_filter.png", dpi=100)
+    plt.close(fig5)
 
-plt.show()
-
-# epochs_t1.compute_psd().plot()
-# plt.show()
-
-# epochs_t2.compute_psd().plot()
-# plt.show()
+    print("\nSaved 5 figures:")
+    print(" - raw_before_filter_timedomain.png")
+    print(" - psd_before_filter.png")
+    print(" - raw_after_filter_timedomain.png")
+    print(" - psd_after_filter.png")
+    print(" - epochs_after_filter.png")
+ 
+ 
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from scipy.linalg import eigh
-
+from src.myeigh import myeigh
 
 class MyLDA(BaseEstimator, TransformerMixin):
     def __init__(self, reg=1e-6):
@@ -36,7 +36,7 @@ class MyLDA(BaseEstimator, TransformerMixin):
             diff = (mu_c - mu_all).reshape(-1,1)
             Sb += Ni * (diff @ diff.T)
 
-        eigenvalues ,eigenvectors = eigh(Sb, Sw)
+        eigenvalues ,eigenvectors = myeigh(Sb, Sw)
         # print(f"vec : {eigenvectors}")
         idx = np.argmax(eigenvalues)
         self._w = eigenvectors[:, idx]
