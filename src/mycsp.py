@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 # from numpy.linalg import eigh
 from scipy.linalg import eigh
+from src.myeigh import myeigh
 
 class MyCSP(BaseEstimator, TransformerMixin):
     def __init__(self, n_components=5, log=True):
@@ -16,7 +17,9 @@ class MyCSP(BaseEstimator, TransformerMixin):
         C1 = self._cov_matrix(X[y == classes[0]])
         C2 = self._cov_matrix(X[y == classes[1]])
 
-        eigenvalues, eigenvectors = eigh(C1, (C1 + C2))
+        # print(f"{C1.shape}")
+        # print(f"{C2.shape}")
+        eigenvalues, eigenvectors = myeigh(C1, (C1 + C2))
 
         idx = np.argsort(eigenvalues)
         eigenvectors = eigenvectors[:, idx]
