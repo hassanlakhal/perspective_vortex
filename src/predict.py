@@ -15,7 +15,7 @@ N_COMPONENTS = 5
 MAX_DELAY_SECONDS = 2.0
 
 
-def mode_predict(subject, run):
+def mode_predict(subject, run, source):
     model_path = f"{MODEL_DIR}/model_sub{subject}_run{run}.pkl"
     if not os.path.exists(model_path):
         print("This model not exits can you try train first")
@@ -27,7 +27,7 @@ def mode_predict(subject, run):
     idx_test = save.get("idx_test")
 
     print(f"Loading data to predict : subject {subject} -- run {run}")
-    epochs , raw = load_and_filter(subject, run)
+    epochs , raw = load_and_filter(subject, run, source=source)
     labels = epochs.events[:, -1]
     X = epochs.get_data()
     y = labels

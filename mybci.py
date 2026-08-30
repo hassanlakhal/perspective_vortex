@@ -4,18 +4,25 @@ import sys
 
 def main():
 
-    if len(sys.argv) == 1:
-        mode_full_evaluation()
+    source = 'physionet'
+    if len(sys.argv) in (1, 2):
+        if len(sys.argv) == 2:
+            source =  sys.argv[1]
+        mode_full_evaluation(source)
+    
+    elif len(sys.argv) in (4, 5):
 
-    elif len(sys.argv) == 4:
         subject = int(sys.argv[1])
         run = int(sys.argv[2])
         action = sys.argv[3]
 
+        if len(sys.argv) == 5:
+            source =  sys.argv[4]
+        
         if action == "train":
-            train(subject, run)
+            train(subject, run, source)
         elif action == "predict":
-            mode_predict(subject, run)
+            mode_predict(subject, run, source)
         
         else:
             print("Unknown action. Use 'train' or 'predict'.")

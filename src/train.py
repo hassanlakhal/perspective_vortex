@@ -13,9 +13,9 @@ from src.mylda import MyLDA
 
 N_COMPONENTS = 5
 MAX_DELAY_SECONDS = 2.0
-TARGET_SFREQ = 160.0
+
 MODEL_DIR = "models"
-ALL_SUBJECTS = list(range(0, 110))
+ALL_SUBJECTS = list(range(1, 109))
 
 EXPERIMENTS = {
     0: [3, 7, 11],   # real: left vs right hand
@@ -25,6 +25,18 @@ EXPERIMENTS = {
     4: [3, 7, 11, 4, 8, 12],   # combined real+imagined hand
     5: [5, 9, 13, 6, 10, 14],  # combined real+imagined hands/feet
 }
+
+BCI2B_SUBJECTS = list(range(1, 10))
+BCI2B_EXPERIMENTS = {
+    0: None,
+}
+
+def get_config(source):
+    if source == "physionet":
+        return ALL_SUBJECTS, EXPERIMENTS
+    elif source == "bci2b":
+        return BCI2B_SUBJECTS, BCI2B_EXPERIMENTS
+
 def build_pipeline():
 
     cps = MyCSP(n_components=5, log=True)
@@ -45,9 +57,9 @@ def build_pipeline():
     ])
     return clf
 
-def train(subject, run):
+def train(subject, run, source):
     print(f"Loading subject {subject}, run {run}...")
-    epochs, raw = load_and_filter(subject, run)
+    epochs, raw = load_and_filter(subject, run, source=source)
 
     labels = epochs.events[:, -1]
     X = epochs.get_data()
@@ -83,22 +95,15 @@ def train(subject, run):
     print(f"Model saved to {model_path}")
 
 
-def mode_full_evaluation():
+def mode_full_evaluation(source):
     experiment_means = {}
- 
-    for exp_id, runs in EXPERIMENTS.items():
+    subjects ,experiments  = get_config(source)
+    for exp_id, runs in experiments.items():
         subject_accuracies = []
  
-        for subject in ALL_SUBJECTS:
+        for subject in subjects:
             try:
-                epochs, raw = load_and_filter(subject, runs)
-                if epochs.info["sfreq"] != TARGET_SFREQ:
-                    print(
-                        f"  Resampling subject {subj}: "
-                        f"{epochs.info['sfreq']} -> {TARGET_SFREQ}"
-                    )
-
-                    epochs.resample(TARGET_SFREQ)
+                epochs, raw = load_and_filter(subject, runs, source=source)
                 X = epochs.get_data()
                 y = epochs.events[:, -1]
  
@@ -113,9 +118,9 @@ def mode_full_evaluation():
         exp_mean = np.mean(subject_accuracies)
         experiment_means[exp_id] = exp_mean
  
-    print("\nMean accuracy of the six different experiments for all 109 subjects:")
+    print(f"\nMean accuracy of the six different experiments for all {len(subjects)} subjects:")
     for exp_id, mean_acc in experiment_means.items():
         print(f"experiment {exp_id}: \taccuracy = {mean_acc:.4f}")
  
     overall_mean = np.mean(list(experiment_means.values()))
-    print(f"\nMean accuracy of 6 experiments: {overall_mean:.4f}")
+    print(f"\nMean accuracy of {len(experiments)} experiments: {overall_mean:.4f}")
