@@ -12,7 +12,8 @@ def _load_physionet(subject, run, l_freq, h_freq):
     eegbci.standardize(raw)
     
     raw.load_data()
-    raw.pick(["C5", "C3", "C1", "Cz", "C2", "C4", "C6", "FC3", "FC4", "CP3", "CP4"])
+    # raw.pick(["C5", "C3", "C1", "Cz", "C2", "C4", "C6", "FC3", "FC4", "CP3", "CP4"])
+    raw.pick(["C3", "C4"])
     # Filtering: 8-30Hz (Mandatory for Motor Imagery)
     raw.filter(8., 30., fir_design='firwin', verbose=False)
     
